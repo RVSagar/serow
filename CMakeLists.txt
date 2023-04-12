@@ -13,8 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(PINOCCHIO pinocchio REQUIRED)
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(PINOCCHIO pinocchio REQUIRED)
+
+find_package(pinocchio REQUIRED)
+find_package(hpp-fcl REQUIRED)
 
 generate_dynamic_reconfigure_options(
    cfg/VarianceControl.cfg
