@@ -339,10 +339,10 @@ void ContactEKF::predict(Vector3d omega_, Vector3d f_, Vector3d pbl_, Vector3d p
 /** Update **/
 void ContactEKF::updateWithLegContacts(Vector3d yl, Quaterniond qyl, Vector3d yr, Quaterniond qyr,  Matrix3d JLQeJL, Matrix3d JRQeJR, double probL_, double probR_, int contactL_, int contactR_)
 {
-    std::cout<<"Contact Status is L/R "<<probL_<<" "<<probR_<<std::endl;
-    std::cout<<"L/R Vector "<<std::endl;
-    std::cout<<yl<<std::endl;
-    std::cout<<yr<<std::endl;
+    // std::cout<<"Contact Status is L/R "<<probL_<<" "<<probR_<<std::endl;
+    // std::cout<<"L/R Vector "<<std::endl;
+    // std::cout<<yl<<std::endl;
+    // std::cout<<yr<<std::endl;
 
 
     Rc.setZero();
