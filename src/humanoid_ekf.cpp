@@ -30,6 +30,8 @@
 #include <iostream>
 #include <algorithm>
 #include <serow/humanoid_ekf.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 
 void humanoid_ekf::loadparams()
 {
@@ -395,6 +397,8 @@ void humanoid_ekf::loadIMUEKFparams()
         n_p.param<bool>("useEuler", imuEKF->useEuler, true);
         n_p.param<bool>("useOutlierDetection", useOutlierDetection, false);
         n_p.param<double>("mahalanobis_TH", imuEKF->mahalanobis_TH, -1.0);
+
+        n_p.param<bool>("zeroYawComponent", zeroYawComponent, false);
     }
     else if(useInIMUEKF)
     {
@@ -1553,17 +1557,39 @@ void humanoid_ekf::publishBodyEstimates()
         tmp_odom_msg.pose.pose.position.x = imuEKF->rX;
         tmp_odom_msg.pose.pose.position.y = imuEKF->rY;
         tmp_odom_msg.pose.pose.position.z = imuEKF->rZ;
-        tmp_odom_msg.pose.pose.orientation.x = imuEKF->qib.x();
-        tmp_odom_msg.pose.pose.orientation.y = imuEKF->qib.y();
-        tmp_odom_msg.pose.pose.orientation.z = imuEKF->qib.z();
-        tmp_odom_msg.pose.pose.orientation.w = imuEKF->qib.w();
+
+        if (zeroYawComponent){
+            tf2::Quaternion tf_quat(imuEKF->qib.x(), imuEKF->qib.y(), imuEKF->qib.z(), imuEKF->qib.w());
+            tf2::Matrix3x3 mat(tf_quat);
+            double roll, pitch, yaw;
+            mat.getRPY(roll, pitch, yaw);
+            // Zero out the yaw component
+            yaw = 0.0;
+            // Convert back to quaternion
+            tf2::Quaternion new_tf_quat;
+            new_tf_quat.setRPY(roll, pitch, yaw);
+            tmp_odom_msg.pose.pose.orientation.x = new_tf_quat.x();
+            tmp_odom_msg.pose.pose.orientation.y = new_tf_quat.y();
+            tmp_odom_msg.pose.pose.orientation.z = new_tf_quat.z();
+            tmp_odom_msg.pose.pose.orientation.w = new_tf_quat.w();
+        }
+        else{
+            tmp_odom_msg.pose.pose.orientation.x = imuEKF->qib.x();
+            tmp_odom_msg.pose.pose.orientation.y = imuEKF->qib.y();
+            tmp_odom_msg.pose.pose.orientation.z = imuEKF->qib.z();
+            tmp_odom_msg.pose.pose.orientation.w = imuEKF->qib.w();
+        }
 
         tmp_odom_msg.twist.twist.linear.x = imuEKF->velX;
         tmp_odom_msg.twist.twist.linear.y = imuEKF->velY;
         tmp_odom_msg.twist.twist.linear.z = imuEKF->velZ;
         tmp_odom_msg.twist.twist.angular.x = imuEKF->gyroX;
         tmp_odom_msg.twist.twist.angular.y = imuEKF->gyroY;
-        tmp_odom_msg.twist.twist.angular.z = imuEKF->gyroZ;
+        if (zeroYawComponent){
+            tmp_odom_msg.twist.twist.angular.z = 0.0;
+        }
+        else
+            tmp_odom_msg.twist.twist.angular.z = imuEKF->gyroZ;
 
         //for(int i=0;i<36;i++)
         //odom_est_msg.pose.covariance[i] = 0;

@@ -146,7 +146,7 @@ private:
 	IMUEKF* imuEKF;
 	IMUinEKF* imuInEKF;
 	ContactEKF* conEKF;
-	bool useIMUEKF, useInIMUEKF, useContactEKF;
+	bool useIMUEKF, useInIMUEKF, useContactEKF, zeroYawComponent;
 	CoMEKF* nipmEKF;
 	butterworthLPF** gyroLPF;
 	MovingAverageFilter** gyroMAF;
